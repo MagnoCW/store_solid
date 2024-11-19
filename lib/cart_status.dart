@@ -1,0 +1,1 @@
+enum CartStatus { open, confirmed }

@@ -13,3 +13,15 @@ class RemoveStockItemEvent extends StockEvent {
 
   RemoveStockItemEvent(this.stockItem);
 }
+
+class AddStockProductEvent extends StockEvent {
+  final StockItem stockItem;
+
+  AddStockProductEvent(this.stockItem);
+}
+
+class DeleteStockProductEvent extends StockEvent {
+  final StockItem stockItem;
+
+  DeleteStockProductEvent(this.stockItem);
+}

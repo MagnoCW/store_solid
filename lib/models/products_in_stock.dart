@@ -33,6 +33,10 @@ class ProductsInStock {
     }
   }
 
-  void addProductToStock() {}
+  void addProductToStock(StockItem product) {
+    stockItem.add(product);
+    print('Product added: $product');
+  }
+
   void deleteProductFromStock() {}
 }

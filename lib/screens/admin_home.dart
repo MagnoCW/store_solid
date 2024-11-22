@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:solid/blocs/cart/cart_bloc.dart';
-import 'package:solid/blocs/cart/cart_state.dart';
+import 'package:solid/blocs/stock/stock.state.dart';
+import 'package:solid/blocs/stock/stock_bloc.dart';
+import 'package:solid/blocs/stock/stock_event.dart';
 import 'package:solid/models/products_in_stock.dart';
-import 'package:solid/models/shopping_cart.dart';
+import 'package:solid/models/stock_item.dart';
+import 'package:solid/utils/stock_utils.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -13,30 +15,57 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
-  final ShoppingCart _shoppingCart = ShoppingCart();
-  late final CartBloc _cartBloc;
+  late final StockBloc _stockBloc;
   final ProductsInStock _productsInStock = ProductsInStock();
+  final TextEditingController _textEditingControllerProductName =
+      TextEditingController();
+  final TextEditingController _textEditingControllerProductPrice =
+      TextEditingController();
+  final TextEditingController _textEditingControllerProductQuantity =
+      TextEditingController();
+
+  void _addProduct(
+      String productName, String productPrice, String productQuantity) {
+    StockItem? product =
+        createStockProduct(productName, productPrice, productQuantity);
+    if (product != null) {
+      setState(() {
+        _productsInStock.addProductToStock(product);
+      });
+    }
+  }
+
+  void _addProductToStock(
+      String productName, String productPrice, String productQuantity) {
+    StockItem? product =
+        createStockProduct(productName, productPrice, productQuantity);
+    if (product != null) {
+      context.read<StockBloc>().add(AddStockProductEvent(product));
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _cartBloc = CartBloc(_shoppingCart, _productsInStock);
+    _stockBloc = StockBloc(_productsInStock);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => _cartBloc,
+      create: (context) => _stockBloc,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Loja de Produtos"),
         ),
-        body: BlocBuilder<CartBloc, CartState>(
+        body: BlocBuilder<StockBloc, StockState>(
           builder: (context, state) {
+            final products = state.productsInStock.stockItem;
             return ListView.builder(
-              itemCount: _productsInStock.stockItem.length,
+              itemCount: products.length,
               itemBuilder: (context, index) {
-                final stockItem = _productsInStock.stockItem[index];
+                final stockItem = products[index];
                 return ListTile(
                   title: Text(stockItem.product.name),
                   subtitle: Column(
@@ -74,6 +103,7 @@ class _AdminHomeState extends State<AdminHome> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           TextField(
+                            controller: _textEditingControllerProductName,
                             decoration: InputDecoration(
                               hintText: "Nome do Produto",
                               border: OutlineInputBorder(
@@ -82,15 +112,16 @@ class _AdminHomeState extends State<AdminHome> {
                                     color: Colors.grey, width: 1),
                               ),
                               filled: true,
-                              fillColor:
-                                  Colors.grey[200], // Cor de fundo da caixinha
+                              fillColor: Colors.grey[200],
                             ),
                           ),
-                          const SizedBox(height: 10), // Espaço entre os campos
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
                                 child: TextField(
+                                  controller:
+                                      _textEditingControllerProductPrice,
                                   decoration: InputDecoration(
                                     hintText: "Preço",
                                     border: OutlineInputBorder(
@@ -106,6 +137,8 @@ class _AdminHomeState extends State<AdminHome> {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: TextField(
+                                  controller:
+                                      _textEditingControllerProductQuantity,
                                   decoration: InputDecoration(
                                     hintText: "Quantidade",
                                     border: OutlineInputBorder(
@@ -126,7 +159,18 @@ class _AdminHomeState extends State<AdminHome> {
                         Row(
                           children: [
                             TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () {
+                                StockItem? product = createStockProduct(
+                                    _textEditingControllerProductName.text,
+                                    _textEditingControllerProductPrice.text,
+                                    _textEditingControllerProductQuantity.text);
+                                if (product != null) {
+                                  context
+                                      .read<StockBloc>()
+                                      .add(AddStockProductEvent(product));
+                                }
+                                Navigator.of(context).pop();
+                              },
                               child: const Text("Adicionar"),
                             ),
                             TextButton(

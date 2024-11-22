@@ -4,8 +4,10 @@ import 'package:solid/blocs/cart/cart_bloc.dart';
 import 'package:solid/blocs/cart/cart_event.dart';
 import 'package:solid/blocs/cart/cart_state.dart';
 import 'package:solid/models/cart_item.dart';
+import 'package:solid/models/product.dart';
 import 'package:solid/models/products_in_stock.dart';
 import 'package:solid/models/shopping_cart.dart';
+import 'package:solid/models/stock_item.dart';
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -18,6 +20,13 @@ class _CustomerHomeState extends State<CustomerHome> {
   final ShoppingCart _shoppingCart = ShoppingCart();
   late final CartBloc _cartBloc;
   final ProductsInStock _productsInStock = ProductsInStock();
+
+  void _addItemToCart(Product product, StockItem stockItem) {
+    context.read<CartBloc>().add(AddCartItemEvent(
+          CartItem(product: product),
+          stockItem,
+        ));
+  }
 
   @override
   void initState() {
@@ -127,10 +136,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                   trailing: IconButton(
                     icon: const Icon(Icons.add_shopping_cart),
                     onPressed: () {
-                      context.read<CartBloc>().add(AddCartItemEvent(
-                            CartItem(product: stockItem.product),
-                            stockItem,
-                          ));
+                      _addItemToCart(stockItem.product, stockItem);
                     },
                   ),
                 );

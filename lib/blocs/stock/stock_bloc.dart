@@ -8,12 +8,21 @@ class StockBloc extends Bloc<StockEvent, StockState> {
 
   StockBloc(this.productsInStock) : super(StockInitialState()) {
     on<AddStockItemEvent>((event, emit) {
-      productsInStock.removeItemFromStock(event.stockItem);
-      emit(StockUpdatedState(productsInStock));
+      productsInStock.addItemToStock();
+      emit(StockUpdatedState(productsInStock: productsInStock));
     });
 
     on<RemoveStockItemEvent>((event, emit) {
-      emit(StockUpdatedState(productsInStock));
+      productsInStock.removeItemFromStock(event.stockItem);
+      emit(StockUpdatedState(productsInStock: productsInStock));
+    });
+    on<AddStockProductEvent>((event, emit) {
+      productsInStock.addProductToStock(event.stockItem);
+      emit(StockUpdatedState(productsInStock: productsInStock));
+    });
+    on<DeleteStockProductEvent>((event, emit) {
+      productsInStock.deleteProductFromStock();
+      emit(StockUpdatedState(productsInStock: productsInStock));
     });
   }
 }

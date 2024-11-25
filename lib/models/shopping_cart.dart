@@ -1,7 +1,7 @@
 import 'package:solid/models/cart_item.dart';
 import 'package:solid/models/cart_status.dart';
-import 'package:solid/models/order_notifier.dart';
 import 'package:solid/models/stock_item.dart';
+import 'package:solid/notifications/email_notifier.dart';
 
 class ShoppingCart {
   List<CartItem> cartItems = [];
@@ -49,10 +49,11 @@ class ShoppingCart {
 
   bool cartValidate() => cartItems.isNotEmpty;
 
-  void confirmOrder(OrderNotifier notifier) {
+  void confirmOrder(EmailNotifier notifier) {
     if (cartValidate()) {
       status = CartStatus.confirmed;
-      notifier.sendConfirmation();
+      notifier.sendNotification(
+          "Order confirmed. A confirmation email has been sent.");
     } else {
       throw Exception('Cannot confirm an empty cart.');
     }
